@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Volleyball Skill Analyzer</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- TensorFlow.js and pose-detection -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.13.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@0.0.9/dist/pose-detection.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.13.0/dist/tf-backend-webgl.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Volleyball Skill Analyzer</h1>
+    <p>Upload a short clip (max ~30s). Analysis runs in your browser & outputs annotated video + coaching tips.</p>
+  </header>
+
+  <main>
+    <section class="controls">
+      <label class="file-label">
+        Choose video
+        <input id="videoInput" type="file" accept="video/*">
+      </label>
+
+      <label for="skill">Skill:</label>
+      <select id="skill">
+        <option value="general" selected>General</option>
+        <option value="serve">Serve</option>
+        <option value="spike">Spike</option>
+        <option value="set">Set</option>
+      </select>
+
+      <label>
+        <input type="checkbox" id="autoDetect" checked>
+        Auto-detect skill
+      </label>
+
+      <div>
+        <button id="startBtn" disabled>Start Analysis</button>
+        <button id="downloadCsvBtn" disabled>Download Data CSV</button>
+      </div>
+      <div id="status">Model: not loaded</div>
+    </section>
+
+    <section class="player">
+      <div class="video-wrap">
+        <video id="video" playsinline crossorigin="anonymous"></video>
+        <canvas id="overlay"></canvas>
+      </div>
+    </section>
+
+    <section class="results">
+      <h2>Data & Feedback</h2>
+      <div id="metrics"></div>
+      <h3>Coaching Tips</h3>
+      <ul id="tips"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <small>Privacy: analysis stays in your browser.</small>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
