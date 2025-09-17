@@ -15,13 +15,20 @@ let framesData = [];
 let eventMarkers = {}; // takeoff, peak, contact, toss
 
 async function loadModel() {
-  statusEl.textContent = 'Loading model...';
-  await tf.ready();
-  const model = poseDetection.SupportedModels.MoveNet;
-  const detectorConfig = {modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING};
-  detector = await poseDetection.createDetector(model, detectorConfig);
-  statusEl.textContent = 'Model loaded. Ready.';
-  startBtn.disabled = false;
+  try {
+    statusEl.textContent = 'Loading model...';
+    await tf.setBackend('webgl');
+    await tf.ready();
+    const model = poseDetection.SupportedModels.MoveNet;
+    detector = await poseDetection.createDetector(model, {
+      modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
+    });
+    statusEl.textContent = 'Model loaded ✅';
+    startBtn.disabled = false;
+  } catch (e) {
+    console.error(e);
+    statusEl.textContent = 'Model failed to load ❌ (see console)';
+  }
 }
 videoInput.addEventListener('change', ev => {
   const file = ev.target.files[0];
@@ -195,11 +202,10 @@ function median(arr){const s=arr.slice().sort((a,b)=>a-b);if(!s.length)return 0;
 // draw markers
 function drawEventMarkers(){
   ctx.font='16px Arial';ctx.fillStyle='yellow';
-  const draw=(ev,label)=>{if(ev){ctx.fillText(label,20,20+Object.keys(eventMarkers).indexOf(label)*20);}};
-  if(eventMarkers.takeoff)draw(eventMarkers.takeoff,'Takeoff');
-  if(eventMarkers.peak)draw(eventMarkers.peak,'Peak');
-  if(eventMarkers.contact)draw(eventMarkers.contact,'Contact');
-  if(eventMarkers.toss)draw(eventMarkers.toss,'Toss');
+  if(eventMarkers.takeoff)ctx.fillText('Takeoff',20,20);
+  if(eventMarkers.peak)ctx.fillText('Peak',20,40);
+  if(eventMarkers.contact)ctx.fillText('Contact',20,60);
+  if(eventMarkers.toss)ctx.fillText('Toss',20,80);
 }
 
 function finishAnalysis(){
@@ -209,7 +215,4 @@ function finishAnalysis(){
     for(const r of framesData){rows.push([r.time.toFixed(3),r.hipY,r.torsoLen,r.armExt,r.shoulderHipRatio,r.leftKneeBend,r.rightKneeBend]);}
     const summary=window.latestAnalysisSummary||{};
     rows.push([]);rows.push(['Summary','Skill (detected)',summary.skill]);rows.push(['Summary','Jump',summary.jumpRelative]);rows.push(['Summary','Arm',summary.armExtRel]);rows.push(['Summary','Shoulder/Hip',summary.shoulderAvg]);rows.push(['Summary','Knee',summary.kneeMedian]);for(const t of summary.tips||[])rows.push(['Tip',t]);
-    const csv=rows.map(r=>r.join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='volleyball_analysis.csv';a.click();};
-}
-
-loadModel();
+    const csv=rows.map(r=>r.join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const url=URL.create
